@@ -23,8 +23,8 @@ def calc_inv_pos(angles, target_pos, target_ori, epsilon, right=True):
         if sum < epsilon:
             break
         if sum > sum_old:
-            print '# set_position error : Distance can not converged.'
-            return None
+            #print '# set_position error : Distance can not converged.'
+            return np.array([])
         sum_old = sum
     return angs
 
