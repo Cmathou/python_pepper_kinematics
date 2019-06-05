@@ -44,7 +44,7 @@ def left_arm_get_position(angles):
     """
     return fk.calc_fk_and_jacob(angles, jacob=False, right=False)
 
-def right_arm_set_position(angles, target_pos, target_ori, epsilon=0.0001):
+def right_arm_set_position(angles, target_pos, target_ori, epsilon=0.001):
     """
     Just calculate the joint angles when the Pepper's right hand position is in the given position
     
@@ -57,9 +57,73 @@ def right_arm_set_position(angles, target_pos, target_ori, epsilon=0.0001):
     Returns:
       A list of joint angles (Unit is radian). If calculation fails, return None.
     """
-    return ik.calc_inv_pos(angles, target_pos, target_ori, epsilon, right=True)
+    actual_position = right_arm_get_position(angles)[0]
 
-def left_arm_set_position(angles, target_pos, target_ori, epsilon = 0.0001):
-    return ik.calc_inv_pos(angles, target_pos, target_ori, epsilon, right=False)
+    valid_pos = np.fabs(np.asarray(actual_position[:-1]) - np.asarray(target_pos[:-1])) >= epsilon
+    while (valid_pos.any()):
+        if (len(ik.calc_inv_pos(angles, np.append(np.asarray(actual_position[:-1]) + epsilon*valid_pos, 1), target_ori, epsilon, right=True)) == 0):
+            if (len(right_arm_try(angles, np.append(np.asarray(actual_position[:-1]) + epsilon*valid_pos, 1), target_ori, epsilon)) == 0):
+                print '# set_position error : Distance can not converged.'
+                return np.array([])
+            else:
+                actual_position = right_arm_get_position(right_arm_try(angles, np.append(np.asarray(actual_position[:-1]) + epsilon*valid_pos, 1), target_ori, epsilon))[0]
+        else:
+            actual_position = right_arm_get_position(ik.calc_inv_pos(angles, np.append(np.asarray(actual_position[:-1]) + epsilon*valid_pos, 1), target_ori, epsilon, right=True))[0]
+        valid_pos = np.fabs(np.asarray(actual_position[:-1]) - np.asarray(target_pos[:-1])) >= epsilon
+    return ik.calc_inv_pos(angles, actual_position, target_ori, epsilon, right=True)
+
+def right_arm_try(angles, target_pos, target_ori, epsilon = 0.001):
+    p = 10;
+    val = np.array([[0,0,0,0],[epsilon,0,0,0],[-epsilon,0,0,0],[0,epsilon,0,0],[0,-epsilon,0,0],[0,0,epsilon,0],[0,0,-epsilon,0],
+            [0.58*epsilon,0.58*epsilon,0.58*epsilon,0],[0.58*epsilon,0.58*epsilon,-0.58*epsilon,0],
+            [0.58*epsilon,-0.58*epsilon,0.58*epsilon,0],[0.58*epsilon,-0.58*epsilon,-0.58*epsilon,0],
+            [-0.58*epsilon,0.58*epsilon,0.58*epsilon,0],[-0.58*epsilon,0.58*epsilon,-0.58*epsilon,0],
+            [-0.58*epsilon,-0.58*epsilon,0.58*epsilon,0],[-0.58*epsilon,-0.58*epsilon,-0.58*epsilon,0]])
+    for i in range(1, p + 1):
+        for e in val:
+            if (len(ik.calc_inv_pos(angles, np.add(target_pos, e*i/p*1.0), target_ori, epsilon, right=True)) != 0):
+                return ik.calc_inv_pos(angles, np.add(target_pos, e*i/p*1.0), target_ori, epsilon, right=True)
+    return np.array([])        
+
+def left_arm_set_position(angles, target_pos, target_ori, epsilon = 0.001):
+    """
+    Just calculate the joint angles when the Pepper's left hand position is in the given position
+    
+    Args:
+      angles : Use the initial position of calculation. Unit = radian
+      target_pos : List. [Px, Py, Pz]. Unit is meter.
+      target_ori : np.array([[R00,R01,R02],[R10,R11,R12],[R20,R21,R22]])
+      epsilon    : The threshold. If the distance between calculation result and target_position is lower than epsilon, this returns value.
+    
+    Returns:
+      A list of joint angles (Unit is radian). If calculation fails, return None.
+    """
+    actual_position = left_arm_get_position(angles)[0]
+
+    valid_pos = np.fabs(np.asarray(actual_position[:-1]) - np.asarray(target_pos[:-1])) >= epsilon
+    while (valid_pos.any()):
+        if (len(ik.calc_inv_pos(angles, np.append(np.asarray(actual_position[:-1]) + epsilon*valid_pos, 1), target_ori, epsilon, right=False)) == 0):
+            if (len(left_arm_try(angles, np.append(np.asarray(actual_position[:-1]) + epsilon*valid_pos, 1), target_ori, epsilon)) == 0):
+                print '# set_position error : Distance can not converged.'
+                return np.array([])
+            else:
+                actual_position = left_arm_get_position(left_arm_try(angles, np.append(np.asarray(actual_position[:-1]) + epsilon*valid_pos, 1), target_ori, epsilon))[0]
+        else:
+            actual_position = left_arm_get_position(ik.calc_inv_pos(angles, np.append(np.asarray(actual_position[:-1]) + epsilon*valid_pos, 1), target_ori, epsilon, right=False))[0]
+        valid_pos = np.fabs(np.asarray(actual_position[:-1]) - np.asarray(target_pos[:-1])) >= epsilon
+    return ik.calc_inv_pos(angles, actual_position, target_ori, epsilon, right=False)
+    
+def left_arm_try(angles, target_pos, target_ori, epsilon = 0.001):
+    p = 10;
+    val = np.array([[0,0,0,0],[epsilon,0,0,0],[-epsilon,0,0,0],[0,epsilon,0,0],[0,-epsilon,0,0],[0,0,epsilon,0],[0,0,-epsilon,0],
+            [0.58*epsilon,0.58*epsilon,0.58*epsilon,0],[0.58*epsilon,0.58*epsilon,-0.58*epsilon,0],
+            [0.58*epsilon,-0.58*epsilon,0.58*epsilon,0],[0.58*epsilon,-0.58*epsilon,-0.58*epsilon,0],
+            [-0.58*epsilon,0.58*epsilon,0.58*epsilon,0],[-0.58*epsilon,0.58*epsilon,-0.58*epsilon,0],
+            [-0.58*epsilon,-0.58*epsilon,0.58*epsilon,0],[-0.58*epsilon,-0.58*epsilon,-0.58*epsilon,0]])
+    for i in range(1, p + 1):
+        for e in val:
+            if (len(ik.calc_inv_pos(angles, np.add(target_pos, e*i/p*1.0), target_ori, epsilon, right=False)) != 0):
+                return ik.calc_inv_pos(angles, np.add(target_pos, e*i/p*1.0), target_ori, epsilon, right=False)
+    return np.array([])
 
 
