@@ -23,7 +23,7 @@ def main():
     pepper.setAngles(pk.left_arm_tags, pk.left_arm_work_pose, 1.0)
     time.sleep(1.0)
 
-
+    """
     current_angles = pepper.getAnglesPosition(pk.right_arm_tags)
     current_position, current_orientation = pk.right_arm_get_position(current_angles)
     print current_position
@@ -37,16 +37,23 @@ def main():
     if target_angles.any():
         pepper.setAngles(pk.right_arm_tags, target_angles.tolist(), 1.0)
     time.sleep(3)
-
+    """
+    pepper.setAngles('LWristYaw', 0.10, 1.0)    
+    
+    time.sleep(2)
     current_angles = pepper.getAnglesPosition(pk.left_arm_tags)
     current_position, current_orientation = pk.left_arm_get_position(current_angles)
-    print current_position
-    target_position = current_position
-    target_position[0] = target_position[0] - 0.05# 5 cm toward left
-    target_position[1] = target_position[1] - 0.10 # 5 cm toward left
-    target_position[2] = target_position[2] + 0.20 # 5 cm toward left
-    target_orientation = current_orientation # This is not supported yet
     
+    print current_orientation
+
+    
+    target_position = current_position
+    target_position[0] = target_position[0]  +0.05# 5 cm toward left
+    target_position[1] = target_position[1]  +0.05# 5 cm toward left
+    target_position[2] = target_position[2]  +0.05# 5 cm toward left
+    target_orientation = current_orientation # This is not supported yet
+    print "-----------------"
+    print current_orientation
     target_angles = pk.left_arm_set_position(current_angles, target_position, target_orientation, 0.01)
     if target_angles.any():
         pepper.setAngles(pk.left_arm_tags, target_angles.tolist(), 1.0)
