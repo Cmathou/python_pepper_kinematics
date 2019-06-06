@@ -29,7 +29,7 @@ def main():
     print current_position
     target_position = current_position
     target_position[0] = target_position[0] - 0.10# 5 cm toward left
-    target_position[1] = target_position[1] + 0.20 # 5 cm toward left
+    target_position[1] = target_position[1] - 0.10 # 5 cm toward left
     target_position[2] = target_position[2] + 0.05 # 5 cm toward left
     target_orientation = current_orientation # This is not supported yet
     
@@ -42,9 +42,9 @@ def main():
     current_position, current_orientation = pk.left_arm_get_position(current_angles)
     print current_position
     target_position = current_position
-    target_position[0] = target_position[0] - 0.10# 5 cm toward left
+    target_position[0] = target_position[0] - 0.05# 5 cm toward left
     target_position[1] = target_position[1] - 0.10 # 5 cm toward left
-    target_position[2] = target_position[2] + 0.10 # 5 cm toward left
+    target_position[2] = target_position[2] + 0.20 # 5 cm toward left
     target_orientation = current_orientation # This is not supported yet
     
     target_angles = pk.left_arm_set_position(current_angles, target_position, target_orientation, 0.01)
