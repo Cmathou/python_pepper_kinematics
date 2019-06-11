@@ -46,7 +46,8 @@ def left_arm_get_position(angles):
 
 def right_arm_set_position(angles, target_pos, target_ori, epsilon=0.001):
     """
-    Just calculate the joint angles when the Pepper's right hand position is in the given position
+    Just calculate the joint angles when the Pepper's right hand position is in the given position try perfect position
+    first then the nearest with less than epsilon distance in second.
     
     Args:
       angles : Use the initial position of calculation. Unit = radian
@@ -75,7 +76,18 @@ def right_arm_set_position(angles, target_pos, target_ori, epsilon=0.001):
     return ik.calc_inv_pos(angles, actual_position, target_ori, epsilon, right=True)
 
 def right_arm_try(angles, target_pos, target_ori, epsilon = 0.001):
+    """
+    try differentes position close to the expected with epsilon distance
+    
+    Args:
+      angles : Use the initial position of calculation. Unit = radian
+      target_pos : List. [Px, Py, Pz]. Unit is meter.
+      target_ori : np.array([[R00,R01,R02],[R10,R11,R12],[R20,R21,R22]])
+      epsilon    : The threshold. If the distance between calculation result and target_position is lower than epsilon, this returns value.
+
+    """
     p = 10;
+    #value of the sphere near expected position
     val = np.array([[0,0,0,0],[epsilon,0,0,0],[-epsilon,0,0,0],[0,epsilon,0,0],[0,-epsilon,0,0],[0,0,epsilon,0],[0,0,-epsilon,0],
             [0.58*epsilon,0.58*epsilon,0.58*epsilon,0],[0.58*epsilon,0.58*epsilon,-0.58*epsilon,0],
             [0.58*epsilon,-0.58*epsilon,0.58*epsilon,0],[0.58*epsilon,-0.58*epsilon,-0.58*epsilon,0],
@@ -91,7 +103,8 @@ def right_arm_try(angles, target_pos, target_ori, epsilon = 0.001):
 
 def left_arm_set_position(angles, target_pos, target_ori, epsilon = 0.001):
     """
-    Just calculate the joint angles when the Pepper's left hand position is in the given position
+    Just calculate the joint angles when the Pepper's left hand position is in the given position try perfect position
+    first then the nearest with less than epsilon distance in second.
     
     Args:
       angles : Use the initial position of calculation. Unit = radian
@@ -124,7 +137,18 @@ def left_arm_set_position(angles, target_pos, target_ori, epsilon = 0.001):
     return arnaque
     
 def left_arm_try(angles, target_pos, target_ori, epsilon = 0.001):
+    """
+    try differentes position close to the expected with epsilon distance
+    
+    Args:
+      angles : Use the initial position of calculation. Unit = radian
+      target_pos : List. [Px, Py, Pz]. Unit is meter.
+      target_ori : np.array([[R00,R01,R02],[R10,R11,R12],[R20,R21,R22]])
+      epsilon    : The threshold. If the distance between calculation result and target_position is lower than epsilon, this returns value.
+
+    """
     p = 10;
+    #value of the sphere near expected position
     val = np.array([[0,0,0,0],[epsilon,0,0,0],[-epsilon,0,0,0],[0,epsilon,0,0],[0,-epsilon,0,0],[0,0,epsilon,0],[0,0,-epsilon,0],
             [0.58*epsilon,0.58*epsilon,0.58*epsilon,0],[0.58*epsilon,0.58*epsilon,-0.58*epsilon,0],
             [0.58*epsilon,-0.58*epsilon,0.58*epsilon,0],[0.58*epsilon,-0.58*epsilon,-0.58*epsilon,0],
