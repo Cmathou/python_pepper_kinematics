@@ -103,7 +103,6 @@ def left_arm_set_position(angles, target_pos, target_ori, epsilon = 0.001):
       A list of joint angles (Unit is radian). If calculation fails, return None.
     """
     actual_position = left_arm_get_position(angles)[0]
-    print angles
     
     valid_pos = np.fabs(np.asarray(actual_position[:-1]) - np.asarray(target_pos[:-1])) >= epsilon
     sign = np.sign(np.asarray(target_pos[:-1]) - np.asarray(actual_position[:-1]))*valid_pos
